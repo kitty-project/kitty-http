@@ -15,6 +15,7 @@
  */
 package kitty.http.server;
 
+import kitty.http.message.HttpContext;
 import kitty.http.message.HttpMethod;
 import kitty.http.message.HttpResponse;
 
@@ -49,7 +50,7 @@ final class KittyHttpServer implements HttpServer {
     private final Map<URI, String> routeNames = HashMap.newHashMap(32);
     private final Map<String, HttpHandler> routeHandlers = HashMap.newHashMap(32);
     private final Map<String, Set<HttpMethod>> routeMethods = HashMap.newHashMap(32);
-    private final DefaultHttpContext httpContext;
+    private HttpContext httpContext;
 
     public KittyHttpServer(String name) {
         if (name == null || name.isBlank()) {
@@ -57,8 +58,6 @@ final class KittyHttpServer implements HttpServer {
         } else {
             this.serveName = name;
         }
-
-        this.httpContext = new DefaultHttpContext(new DefaultHttpResponse());
     }
 
     @Override
@@ -181,7 +180,7 @@ final class KittyHttpServer implements HttpServer {
             var httpHeaders = HttpHeadersFactory.create(clientRequest);
             var httpBody = HttpBodyFactory.create(clientRequest);
             var httpRequest = HttpRequestFactory.create(httpRequestLine, httpHeaders, httpBody);
-            this.httpContext.request(httpRequest);
+            this.httpContext = HttpContextFactory.create(httpRequest, new DefaultHttpResponse());
         } catch (IOException exception) {
             logger.log(System.Logger.Level.ERROR, exception);
         }

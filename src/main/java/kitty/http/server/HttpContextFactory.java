@@ -22,6 +22,11 @@ import kitty.http.message.HttpResponse;
 /**
  * @author Julian Jupiter
  */
-interface HttpContextFactory {
-    HttpContext create(HttpRequest request, HttpResponse response);
+final class HttpContextFactory {
+    private HttpContextFactory() {
+    }
+
+    public static HttpContext create(HttpRequest request, HttpResponse response) {
+        return new DefaultHttpContext(request, response);
+    }
 }

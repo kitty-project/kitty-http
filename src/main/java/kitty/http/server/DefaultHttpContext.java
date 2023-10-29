@@ -22,26 +22,5 @@ import kitty.http.message.HttpResponse;
 /**
  * @author Julian Jupiter
  */
-class DefaultHttpContext implements HttpContext {
-    private HttpRequest request;
-    private final HttpResponse response;
-
-    DefaultHttpContext(HttpResponse response) {
-        this.response = response;
-    }
-
-    @Override
-    public HttpRequest request() {
-        return request;
-    }
-
-    public HttpContext request(HttpRequest request) {
-        this.request = request;
-        return this;
-    }
-
-    @Override
-    public HttpResponse response() {
-        return response;
-    }
+record DefaultHttpContext(HttpRequest request, HttpResponse response) implements HttpContext {
 }
