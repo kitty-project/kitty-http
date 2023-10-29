@@ -15,31 +15,32 @@
  */
 package kitty.http.server;
 
-import kitty.http.message.HttpBody;
+import kitty.http.message.HttpCookie;
 import kitty.http.message.HttpHeader;
-import kitty.http.message.HttpMessage;
 
+import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Julian Jupiter
  */
-class DefaultHttpMessage<T extends HttpMessage> {
-    protected final HttpHeaders headers;
-    protected HttpBody body;
-
-    DefaultHttpMessage() {
-        this.headers = HttpHeaders.create();
-        this.body = new NoContentHttpBody();
+final class HttpCookiesFactory {
+    private HttpCookiesFactory() {
     }
 
-    DefaultHttpMessage(List<HttpHeader> headers, HttpBody body) {
-        this.headers = HttpHeaders.create(headers);
-        this.body = body;
-    }
-
-    protected T body(HttpBody body) {
-        this.body = body;
-        return (T) this;
+    public static List<HttpCookie> create(List<HttpHeader> headers) {
+        return  headers.stream()
+                .filter(header -> header.name().equalsIgnoreCase("Cookie"))
+                .map(HttpHeader::values)
+                .flatMap(Set::stream)
+                .map(cookie -> cookie.split("="))
+                .map(cookie -> new HttpCookie(cookie[0], cookie[1]))
+                .toList();
     }
 }

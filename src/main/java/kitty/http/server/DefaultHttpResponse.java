@@ -16,8 +16,10 @@
 package kitty.http.server;
 
 import kitty.http.message.HttpBody;
+import kitty.http.message.HttpCookie;
 import kitty.http.message.HttpHeader;
 import kitty.http.message.HttpResponse;
+import kitty.http.message.HttpSetCookie;
 import kitty.http.message.HttpStatus;
 import kitty.http.message.HttpStatusLine;
 import kitty.http.message.HttpVersion;
@@ -31,7 +33,9 @@ import java.util.Set;
 class DefaultHttpResponse extends DefaultHttpMessage<HttpResponse> implements HttpResponse {
     private static final HttpVersion DEFAULT_HTTP_VERSION = HttpVersion.HTTP_1_1;
     private static final HttpStatus DEFAULT_HTTP_STATUS = HttpStatus.OK;
+    private static final String SET_COOKIE = "Set-Cookie";
     private HttpStatusLine statusLine = new HttpStatusLine(DEFAULT_HTTP_VERSION, DEFAULT_HTTP_STATUS);
+    private final HttpSetCookies cookies = HttpSetCookies.create();
     private boolean next;
 
     @Override
@@ -75,6 +79,29 @@ class DefaultHttpResponse extends DefaultHttpMessage<HttpResponse> implements Ht
     }
 
     @Override
+    public List<HttpSetCookie> cookies() {
+        return this.cookies.get();
+    }
+
+    @Override
+    public HttpResponse cookie(String name, String value) {
+        this.cookies.add(name, value);
+        return this;
+    }
+
+    @Override
+    public HttpResponse cookie(HttpSetCookie cookie) {
+        this.cookies.add(cookie);
+        return this;
+    }
+
+    @Override
+    public HttpResponse cookies(List<HttpSetCookie> cookies) {
+        this.cookies.addAll(cookies);
+        return this;
+    }
+
+    @Override
     public HttpBody body() {
         return super.body;
     }
@@ -96,10 +123,11 @@ class DefaultHttpResponse extends DefaultHttpMessage<HttpResponse> implements Ht
             case DefaultHttpBody defaultBody -> """
                     %s
                     %s
+                    Content-Length: %s
                     %s
-                    
+                                        
                     %s
-                    """.formatted(this.statusLine, this.headers, this.contentLengthHeader(defaultBody), defaultBody);
+                    """.formatted(this.statusLine, this.headers, this.contentLengthHeader(defaultBody), this.cookies, defaultBody);
             case NoContentHttpBody noContentBody -> """
                     %s
                     %s

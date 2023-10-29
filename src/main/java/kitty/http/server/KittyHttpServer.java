@@ -178,8 +178,9 @@ final class KittyHttpServer implements HttpServer {
             var clientRequest = this.readRaw(socketChannel);
             var httpRequestLine = HttpRequestLineFactory.create(clientRequest);
             var httpHeaders = HttpHeadersFactory.create(clientRequest);
+            var httpCookies = HttpCookiesFactory.create(httpHeaders);
             var httpBody = HttpBodyFactory.create(clientRequest);
-            var httpRequest = HttpRequestFactory.create(httpRequestLine, httpHeaders, httpBody);
+            var httpRequest = HttpRequestFactory.create(httpRequestLine, httpHeaders, httpCookies, httpBody);
             this.httpContext = HttpContextFactory.create(httpRequest, new DefaultHttpResponse());
         } catch (IOException exception) {
             logger.log(System.Logger.Level.ERROR, exception);

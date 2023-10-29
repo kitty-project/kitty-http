@@ -16,6 +16,7 @@
 package kitty.http.server;
 
 import kitty.http.message.HttpBody;
+import kitty.http.message.HttpCookie;
 import kitty.http.message.HttpHeader;
 import kitty.http.message.HttpRequest;
 import kitty.http.message.HttpRequestLine;
@@ -29,7 +30,7 @@ final class HttpRequestFactory {
     private HttpRequestFactory() {
     }
 
-    public static HttpRequest create(HttpRequestLine requestLine, List<HttpHeader> headers, HttpBody body) {
-        return new DefaultHttpRequest(requestLine, headers, body);
+    public static HttpRequest create(HttpRequestLine requestLine, List<HttpHeader> headers, List<HttpCookie> cookies, HttpBody body) {
+        return new DefaultHttpRequest(requestLine, headers, cookies, body);
     }
 }

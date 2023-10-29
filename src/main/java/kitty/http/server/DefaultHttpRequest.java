@@ -16,12 +16,14 @@
 package kitty.http.server;
 
 import kitty.http.message.HttpBody;
+import kitty.http.message.HttpCookie;
 import kitty.http.message.HttpHeader;
 import kitty.http.message.HttpRequest;
 import kitty.http.message.HttpRequestLine;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -29,10 +31,12 @@ import java.util.Set;
  */
 class DefaultHttpRequest extends DefaultHttpMessage<HttpRequest> implements HttpRequest {
     private final HttpRequestLine requestLine;
+    private final List<HttpCookie> cookies;
 
-    DefaultHttpRequest(HttpRequestLine requestLine, List<HttpHeader> headers, HttpBody body) {
+    DefaultHttpRequest(HttpRequestLine requestLine, List<HttpHeader> headers, List<HttpCookie> cookies, HttpBody body) {
         super(headers, body);
         this.requestLine = requestLine;
+        this.cookies = cookies;
     }
 
     @Override
@@ -43,6 +47,18 @@ class DefaultHttpRequest extends DefaultHttpMessage<HttpRequest> implements Http
     @Override
     public List<HttpHeader> headers() {
         return super.headers.get();
+    }
+
+    @Override
+    public List<HttpCookie> cookies() {
+        return this.cookies;
+    }
+
+    @Override
+    public Optional<HttpCookie> get(String name) {
+        return this.cookies.stream()
+                .filter(cookie -> cookie.name().equalsIgnoreCase(name))
+                .findFirst();
     }
 
     @Override
