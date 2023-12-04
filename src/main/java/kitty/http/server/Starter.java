@@ -15,24 +15,15 @@
  */
 package kitty.http.server;
 
-import kitty.http.message.HttpMethod;
-
-import java.util.concurrent.Executor;
-
 /**
  * @author Julian Jupiter
  */
-public interface HttpServer extends Starter {
+interface Starter {
+    void start();
 
-    static HttpServer create() {
-        return new KittyHttpServer(null);
-    }
+    void start(int port);
 
-    static HttpServer create(String name) {
-        return new KittyHttpServer(name);
-    }
+    void start(Runnable runnable);
 
-    HttpServer map(HttpMethod method, String path, HttpHandler httpHandler);
-
-    HttpServer executor(Executor executor);
+    void start(int port, Runnable runnable);
 }

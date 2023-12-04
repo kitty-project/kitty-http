@@ -84,30 +84,30 @@ final class KittyHttpServer implements HttpServer {
     }
 
     @Override
-    public void run() {
-        this.start();
+    public void start() {
+        this.startServer();
     }
 
     @Override
-    public void run(int port) {
+    public void start(int port) {
         this.port = port;
-        this.start();
+        this.startServer();
     }
 
     @Override
-    public void run(Runnable runnable) {
+    public void start(Runnable runnable) {
         runnable.run();
-        this.start();
+        this.startServer();
     }
 
     @Override
-    public void run(int port, Runnable runnable) {
+    public void start(int port, Runnable runnable) {
         this.port = port;
         runnable.run();
-        this.start();
+        this.startServer();
     }
 
-    private void start() {
+    private void startServer() {
         try (var selector = Selector.open();
              var serverSocketChannel = ServerSocketChannel.open()) {
             if (serverSocketChannel.isOpen() && selector.isOpen()) {
