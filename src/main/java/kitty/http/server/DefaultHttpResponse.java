@@ -24,6 +24,7 @@ import kitty.http.message.HttpStatus;
 import kitty.http.message.HttpStatusLine;
 import kitty.http.message.HttpVersion;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 
@@ -137,6 +138,6 @@ class DefaultHttpResponse extends DefaultHttpMessage<HttpResponse> implements Ht
     }
 
     private int contentLengthHeader(HttpBody body) {
-        return body.toString().getBytes().length;
+        return body.toString().getBytes(StandardCharsets.UTF_8).length + 1;
     }
 }
