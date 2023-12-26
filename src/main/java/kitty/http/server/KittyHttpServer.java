@@ -63,7 +63,7 @@ final class KittyHttpServer implements HttpServer {
     @Override
     public HttpServer map(HttpMethod method, String path, HttpHandler httpHandler) {
         var handlerName = UUID.randomUUID().toString().substring(0, 8);
-        this.routeNames.computeIfAbsent(URI.create(path), name -> handlerName);
+        this.routeNames.putIfAbsent(URI.create(path), handlerName);
         this.routeHandlers.computeIfAbsent(handlerName, handler -> httpHandler);
         this.routeMethods.computeIfAbsent(handlerName, name -> {
             Set<HttpMethod> value = HashSet.newHashSet(1);
