@@ -55,7 +55,7 @@ class DefaultHttpRequest extends DefaultHttpMessage<HttpRequest> implements Http
     }
 
     @Override
-    public Optional<HttpCookie> get(String name) {
+    public Optional<HttpCookie> cookie(String name) {
         return this.cookies.stream()
                 .filter(cookie -> cookie.name().equalsIgnoreCase(name))
                 .findFirst();
