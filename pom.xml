@@ -9,21 +9,8 @@
     <version>0.0.1</version>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <dependencies>
-    <!-- Clone https://github.com/kitty-project/kitty-http-message-api.git.
-        cd kitty-http-message-api
-        Checkout init branch
-        Install: ./mvnw clean install -->
-        <dependency>
-            <groupId>kitty</groupId>
-            <artifactId>kitty-http-message-api</artifactId>
-            <version>0.0.1</version>
-        </dependency>
-    </dependencies>
-
 </project>

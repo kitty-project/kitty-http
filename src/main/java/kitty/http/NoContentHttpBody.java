@@ -13,23 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
-
-import kitty.http.message.HttpContext;
-import kitty.http.message.HttpResponse;
-import kitty.http.message.HttpStatus;
+package kitty.http;
 
 /**
  * @author Julian Jupiter
  */
-class MethodNotAllowedHttpHandler implements HttpHandler {
+final class NoContentHttpBody implements HttpBody {
     @Override
-    public HttpResponse handle(HttpContext context) {
-        var response = context.response();
-        var method = HttpStatus.METHOD_NOT_ALLOWED;
-        response.status(method);
-        response.header("Content-Type", "text/plain");
-        response.body(method.reasonPhrase());
-        return response;
+    public String toString() {
+        return "";
     }
 }

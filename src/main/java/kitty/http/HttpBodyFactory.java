@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
+package kitty.http;
 
-import kitty.http.message.HttpBody;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * @author Julian Jupiter
@@ -28,7 +29,7 @@ final class HttpBodyFactory {
         var lines = request.lines().toArray(String[]::new);
         var length = lines.length;
         var bodyStarted = false;
-        var bodyStringBuilder = new StringBuilder();
+        var list = new ArrayList<String>();
         for (var i = 1; i < length; i++) {
             var line = lines[i];
             if (!bodyStarted) {
@@ -38,9 +39,9 @@ final class HttpBodyFactory {
                 continue;
             }
 
-            bodyStringBuilder.append(line).append("\n");
+            list.add(line);
         }
 
-        return new DefaultHttpBody(bodyStringBuilder.toString());
+        return new DefaultHttpBody(String.join("\n", list));
     }
 }

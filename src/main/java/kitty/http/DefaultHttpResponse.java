@@ -13,16 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
-
-import kitty.http.message.HttpBody;
-import kitty.http.message.HttpCookie;
-import kitty.http.message.HttpHeader;
-import kitty.http.message.HttpResponse;
-import kitty.http.message.HttpSetCookie;
-import kitty.http.message.HttpStatus;
-import kitty.http.message.HttpStatusLine;
-import kitty.http.message.HttpVersion;
+package kitty.http;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -38,6 +29,10 @@ class DefaultHttpResponse extends DefaultHttpMessage<HttpResponse> implements Ht
     private HttpStatusLine statusLine = new HttpStatusLine(DEFAULT_HTTP_VERSION, DEFAULT_HTTP_STATUS);
     private final HttpSetCookies cookies = HttpSetCookies.create();
     private boolean next;
+
+    public DefaultHttpResponse(List<HttpHeader> headers) {
+        super(headers);
+    }
 
     @Override
     public HttpStatusLine statusLine() {
@@ -121,18 +116,35 @@ class DefaultHttpResponse extends DefaultHttpMessage<HttpResponse> implements Ht
     @Override
     public String toString() {
         return switch (this.body) {
-            case DefaultHttpBody defaultBody -> """
-                    %s
-                    %s
-                    Content-Length: %s
-                    %s
-                                        
-                    %s
-                    """.formatted(this.statusLine, this.headers, this.contentLengthHeader(defaultBody), this.cookies, defaultBody);
-            case NoContentHttpBody noContentBody -> """
-                    %s
-                    %s
-                    """.formatted(this.statusLine, this.headers);
+            case DefaultHttpBody defaultBody -> {
+                if (!this.headers.contains("Content-type")) {
+                    this.headers.add(new HttpHeader("Content-Type", "text/plain"));
+                }
+                this.headers.add(new HttpHeader("Content-Length", String.valueOf(this.contentLengthHeader(defaultBody))));
+                if (this.cookies.toString().isBlank()) {
+                    yield """
+                            %s
+                            %s
+                                                
+                            %s
+                            """.formatted(this.statusLine, this.headers, defaultBody);
+                } else {
+                    yield """
+                            %s
+                            %s
+                            %s
+                                                
+                            %s
+                            """.formatted(this.statusLine, this.headers, this.cookies, defaultBody);
+                }
+            }
+            case NoContentHttpBody noContentBody -> {
+                this.headers.add(new HttpHeader("Content-Length", String.valueOf(0)));
+                yield """
+                        %s
+                        %s
+                        """.formatted(this.statusLine, this.headers);
+            }
             default -> throw new IllegalArgumentException("Invalid HTTP body");
         };
     }

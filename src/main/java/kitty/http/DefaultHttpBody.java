@@ -13,24 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
-
-import kitty.http.message.HttpBody;
-import kitty.http.message.HttpCookie;
-import kitty.http.message.HttpHeader;
-import kitty.http.message.HttpRequest;
-import kitty.http.message.HttpRequestLine;
-
-import java.util.List;
+package kitty.http;
 
 /**
  * @author Julian Jupiter
  */
-final class HttpRequestFactory {
-    private HttpRequestFactory() {
-    }
-
-    public static HttpRequest create(HttpRequestLine requestLine, List<HttpHeader> headers, List<HttpCookie> cookies, HttpBody body) {
-        return new DefaultHttpRequest(requestLine, headers, cookies, body);
+record DefaultHttpBody(String value) implements HttpBody {
+    @Override
+    public String toString() {
+        return value;
     }
 }

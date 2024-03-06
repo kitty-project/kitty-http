@@ -13,16 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
+package kitty.http;
 
-import kitty.http.message.HttpBody;
+import java.util.List;
 
 /**
  * @author Julian Jupiter
  */
-final class NoContentHttpBody implements HttpBody {
-    @Override
-    public String toString() {
-        return "";
-    }
+public non-sealed interface HttpResponse extends HttpMessage {
+    HttpStatusLine statusLine();
+
+    HttpResponse status(int statusCode);
+
+    HttpResponse status(HttpStatus status);
+
+    HttpResponse header(String name, String value);
+
+    HttpResponse header(HttpHeader header);
+
+    HttpResponse headers(List<HttpHeader> headers);
+
+    List<HttpSetCookie> cookies();
+
+    HttpResponse cookie(String name, String value);
+
+    HttpResponse cookie(HttpSetCookie cookie);
+
+    HttpResponse cookies(List<HttpSetCookie> cookies);
+
+    HttpResponse body(String body);
+
+    void next();
 }

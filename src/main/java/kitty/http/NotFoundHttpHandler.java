@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
+package kitty.http;
 
 /**
  * @author Julian Jupiter
  */
-interface Starter {
-    void start();
-
-    void start(int port);
-
-    void start(Runnable runnable);
-
-    void start(int port, Runnable runnable);
+class NotFoundHttpHandler implements HttpHandler {
+    @Override
+    public HttpResponse handle(HttpContext context) {
+        var response = context.response();
+        var method = HttpStatus.NOT_FOUND;
+        response.status(method);
+        response.header("Content-Type", "text/plain");
+        response.body(method.reasonPhrase());
+        return response;
+    }
 }

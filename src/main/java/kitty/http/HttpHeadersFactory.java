@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
+package kitty.http;
 
-import kitty.http.message.HttpHeader;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
@@ -27,6 +26,10 @@ import java.util.stream.Collectors;
  */
 final class HttpHeadersFactory {
     private HttpHeadersFactory() {
+    }
+
+    public static List<HttpHeader> create() {
+        return new ArrayList<>();
     }
 
     public static List<HttpHeader> create(String request) {

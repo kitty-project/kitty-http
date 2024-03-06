@@ -13,23 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
+package kitty.http;
 
-import kitty.http.message.HttpContext;
-import kitty.http.message.HttpResponse;
-import kitty.http.message.HttpStatus;
+import java.util.List;
 
 /**
  * @author Julian Jupiter
  */
-class NotFoundHttpHandler implements HttpHandler {
-    @Override
-    public HttpResponse handle(HttpContext context) {
-        var response = context.response();
-        var method = HttpStatus.NOT_FOUND;
-        response.status(method);
-        response.header("Content-Type", "text/plain");
-        response.body(method.reasonPhrase());
-        return response;
+class DefaultHttpMessage<T extends HttpMessage> {
+    protected final HttpHeaders headers;
+    protected HttpBody body;
+
+    DefaultHttpMessage(List<HttpHeader> headers) {
+        this.headers = HttpHeaders.create(headers);
+        this.body = new NoContentHttpBody();
+    }
+
+    DefaultHttpMessage(List<HttpHeader> headers, HttpBody body) {
+        this.headers = HttpHeaders.create(headers);
+        this.body = body;
+    }
+
+    protected T body(HttpBody body) {
+        this.body = body;
+        return (T) this;
     }
 }

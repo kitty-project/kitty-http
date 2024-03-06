@@ -13,98 +13,101 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
-
-import kitty.http.message.HttpSetCookie;
+package kitty.http;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * @author Julian Jupiter
  */
-class HttpSetCookies {
-    private final Map<String, HttpSetCookie> cookies = new HashMap<>();
+class HttpHeaders {
+    private final Map<String, HttpHeader> headers = new HashMap<>();
 
-    private HttpSetCookies() {
+    private HttpHeaders() {
     }
 
-    public static HttpSetCookies create() {
-        return new HttpSetCookies();
+    private HttpHeaders(List<HttpHeader> headers) {
+        if (headers != null) {
+            headers.forEach(httpHeader -> this.headers.put(httpHeader.name(), httpHeader));
+        }
+    }
+
+    public static HttpHeaders create() {
+        return new HttpHeaders();
+    }
+
+    public static HttpHeaders create(List<HttpHeader> headers) {
+        return new HttpHeaders(headers);
     }
 
     public int size() {
-        return this.cookies.size();
+        return this.headers.size();
     }
 
     public boolean isEmpty() {
-        return this.cookies.isEmpty();
+        return this.headers.isEmpty();
     }
 
 
     public boolean contains(String name) {
-        return this.cookies.containsKey(normalize(name));
+        return this.headers.containsKey(normalize(name));
     }
 
-    public List<HttpSetCookie> get() {
-        return this.cookies.values().stream()
+    public List<HttpHeader> get() {
+        return this.headers.values().stream()
                 .toList();
     }
 
-    public Optional<HttpSetCookie> get(String name) {
-        return Optional.ofNullable(this.cookies.get(normalize(name)));
+    public Optional<HttpHeader> get(String name) {
+        return Optional.ofNullable(this.headers.get(normalize(name)));
     }
 
-    public HttpSetCookie getOrDefault(String name, String defaultValue) {
-        return this.cookies.getOrDefault(name, new HttpSetCookie(normalize(name), defaultValue));
+    public HttpHeader getOrDefault(String name, Set<String> defaultValue) {
+        return this.headers.getOrDefault(name, new HttpHeader(normalize(name), defaultValue));
     }
 
-    public HttpSetCookies add(String name, String value) {
-        checkValue(value);
-        this.cookies.put(normalize(name), new HttpSetCookie(normalize(name), value));
+    public HttpHeaders add(String name, Set<String> values) {
+        values.forEach(HttpHeaders::checkValue);
+        this.headers.put(normalize(name), new HttpHeader(normalize(name), values));
         return this;
     }
 
-    public HttpSetCookies add(HttpSetCookie cookie) {
-        checkValue(cookie.value());
-        this.cookies.put(normalize(cookie.name()), new HttpSetCookie(normalize(cookie.name()), cookie.value()));
+    public HttpHeaders add(HttpHeader header) {
+        header.values().forEach(HttpHeaders::checkValue);
+        this.headers.put(normalize(header.name()), new HttpHeader(normalize(header.name()), header.values()));
         return this;
     }
 
-    public HttpSetCookies addAll(List<HttpSetCookie> cookies) {
-        cookies.forEach(this::add);
+    public HttpHeaders addAll(List<HttpHeader> headers) {
+        headers.forEach(this::add);
         return this;
     }
 
-    public HttpSetCookies replace(String name, String newValue) {
-        if (contains(name)) {
-            checkValue(newValue);
-            var cookie = this.cookies.get(name)
-                    .value(newValue);
-            this.cookies.replace(normalize(name), cookie);
-        }
-
+    public HttpHeaders replace(String name, Set<String> newValue) {
+        this.headers.replace(normalize(name), new HttpHeader(normalize(name), newValue));
         return this;
     }
 
-    public HttpSetCookies remove(String name) {
-        this.cookies.remove(normalize(name));
+    public HttpHeaders remove(String name) {
+        this.headers.remove(normalize(name));
         return this;
     }
 
-    public HttpSetCookies clear() {
-        this.cookies.clear();
+    public HttpHeaders clear() {
+        this.headers.clear();
         return this;
     }
 
     @Override
     public String toString() {
-        return this.cookies.values().stream()
-                .map(cookie -> "Set-Cookie: " + cookie)
+        return this.headers.values().stream()
+                .map(HttpHeader::toString)
                 .collect(Collectors.joining("\n"));
     }
 
@@ -116,14 +119,21 @@ class HttpSetCookies {
             return name;
         }
 
-        var c = name.toCharArray();
-        for (var i = 0; i < length; i++) {
-            if (c[i] == '\r' || c[i] == '\n') {
-                throw new IllegalArgumentException("Illegal character in name");
+        var parts = name.toLowerCase().split("-");
+
+        for (var i = 0; i < parts.length; i++) {
+            char[] chars = parts[i].toCharArray();
+            for (char c : chars) {
+                if (c < 'a' || c > 'z') {
+                    throw new IllegalArgumentException("Illegal character in HTTP header name");
+                }
             }
+
+            chars[0] = Character.toUpperCase(chars[0]);
+            parts[i] = new String(chars);
         }
 
-        return new String(c);
+        return String.join("-", parts);
     }
 
     private static void checkValue(String value) {

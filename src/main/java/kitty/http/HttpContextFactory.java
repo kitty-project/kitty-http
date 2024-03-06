@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
-
-import kitty.http.message.HttpContext;
-import kitty.http.message.HttpRequest;
-import kitty.http.message.HttpResponse;
+package kitty.http;
 
 /**
  * @author Julian Jupiter
  */
-record DefaultHttpContext(HttpRequest request, HttpResponse response) implements HttpContext {
+final class HttpContextFactory {
+    private HttpContextFactory() {
+    }
+
+    public static HttpContext create(HttpRequest request, HttpResponse response) {
+        return new DefaultHttpContext(request, response);
+    }
 }

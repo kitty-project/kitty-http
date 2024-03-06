@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
-
-import kitty.http.message.HttpContext;
-import kitty.http.message.HttpMethod;
-import kitty.http.message.HttpResponse;
+package kitty.http;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectionKey;
@@ -30,10 +25,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 
@@ -47,34 +38,16 @@ final class KittyHttpServer implements HttpServer {
     private final String serveName;
     private int port = DEFAULT_PORT;
     private Executor executor;
-    private final Map<URI, String> routeNames = HashMap.newHashMap(32);
-    private final Map<String, HttpHandler> routeHandlers = HashMap.newHashMap(32);
-    private final Map<String, Set<HttpMethod>> routeMethods = HashMap.newHashMap(32);
     private HttpContext httpContext;
+    private final HttpHandler handler;
 
-    public KittyHttpServer(String name) {
+    public KittyHttpServer(HttpHandler handler, String name) {
+        this.handler = handler;
         if (name == null || name.isBlank()) {
             this.serveName = "kitty-http-server-" + UUID.randomUUID().toString().substring(0, 8);
         } else {
             this.serveName = name;
         }
-    }
-
-    @Override
-    public HttpServer map(HttpMethod method, String path, HttpHandler httpHandler) {
-        var handlerName = UUID.randomUUID().toString().substring(0, 8);
-        this.routeNames.putIfAbsent(URI.create(path), handlerName);
-        this.routeHandlers.computeIfAbsent(handlerName, handler -> httpHandler);
-        this.routeMethods.computeIfAbsent(handlerName, name -> {
-            Set<HttpMethod> value = HashSet.newHashSet(1);
-            value.add(method);
-            return value;
-        });
-        this.routeMethods.computeIfPresent(handlerName, (name, value) -> {
-            value.add(method);
-            return value;
-        });
-        return this;
     }
 
     @Override
@@ -85,25 +58,25 @@ final class KittyHttpServer implements HttpServer {
 
     @Override
     public void start() {
-        this.startServer();
+        this.start(DEFAULT_PORT, null);
     }
 
     @Override
     public void start(int port) {
-        this.port = port;
-        this.startServer();
+        this.start(port, null);
     }
 
     @Override
     public void start(Runnable runnable) {
-        runnable.run();
-        this.startServer();
+        this.start(DEFAULT_PORT, runnable);
     }
 
     @Override
     public void start(int port, Runnable runnable) {
         this.port = port;
-        runnable.run();
+        if (runnable != null) {
+            runnable.run();
+        }
         this.startServer();
     }
 
@@ -119,18 +92,17 @@ final class KittyHttpServer implements HttpServer {
                 this.logger.log(System.Logger.Level.INFO, "HTTP server name: " + this.serveName);
                 this.process(selector);
             } else {
-                logger.log(System.Logger.Level.INFO, "The server socket channel or selector cannot be opened!");
+                this.logger.log(System.Logger.Level.ERROR, "The server socket channel or selector cannot be opened!");
             }
         } catch (IOException exception) {
-            logger.log(System.Logger.Level.ERROR, exception);
+            this.logger.log(System.Logger.Level.ERROR, exception);
         }
     }
 
     private void process(Selector selector) throws IOException {
         while (true) {
             selector.select(1000);
-            var selectedKeys = selector.selectedKeys();
-            var keyIterator = selectedKeys.iterator();
+            var keyIterator = selector.selectedKeys().iterator();
             while (keyIterator.hasNext()) {
                 var selectionKey = keyIterator.next();
                 keyIterator.remove();
@@ -142,13 +114,13 @@ final class KittyHttpServer implements HttpServer {
                 if (selectionKey.isAcceptable()) {
                     this.accept(selector, selectionKey);
                 } else if (selectionKey.isReadable()) {
-                    if (executor != null) {
+                    if (this.executor != null) {
                         this.executor.execute(() -> this.read(selectionKey));
                     } else {
                         this.read(selectionKey);
                     }
                 } else if (selectionKey.isWritable()) {
-                    if (executor != null) {
+                    if (this.executor != null) {
                         this.executor.execute(() -> this.write(selectionKey));
                     } else {
                         this.write(selectionKey);
@@ -167,7 +139,7 @@ final class KittyHttpServer implements HttpServer {
             socketChannel.setOption(StandardSocketOptions.TCP_NODELAY, true);
             socketChannel.register(selector, SelectionKey.OP_READ);
         } catch (IOException exception) {
-            logger.log(System.Logger.Level.ERROR, exception);
+            this.logger.log(System.Logger.Level.ERROR, exception);
         }
     }
 
@@ -177,13 +149,14 @@ final class KittyHttpServer implements HttpServer {
         try {
             var clientRequest = this.readRaw(socketChannel);
             var httpRequestLine = HttpRequestLineFactory.create(clientRequest);
-            var httpHeaders = HttpHeadersFactory.create(clientRequest);
-            var httpCookies = HttpCookiesFactory.create(httpHeaders);
+            var httpRequestHeaders = HttpHeadersFactory.create(clientRequest);
+            var httpCookies = HttpCookiesFactory.create(httpRequestHeaders);
             var httpBody = HttpBodyFactory.create(clientRequest);
-            var httpRequest = HttpRequestFactory.create(httpRequestLine, httpHeaders, httpCookies, httpBody);
-            this.httpContext = HttpContextFactory.create(httpRequest, new DefaultHttpResponse());
+            var httpRequest = HttpRequestFactory.create(httpRequestLine, httpRequestHeaders, httpCookies, httpBody);
+            var defaultHttpHeaders = HttpHeadersFactory.create();
+            this.httpContext = HttpContextFactory.create(httpRequest, new DefaultHttpResponse(defaultHttpHeaders));
         } catch (IOException exception) {
-            logger.log(System.Logger.Level.ERROR, exception);
+            this.logger.log(System.Logger.Level.ERROR, exception);
         }
 
         selectionKey.interestOps(SelectionKey.OP_WRITE);
@@ -211,27 +184,7 @@ final class KittyHttpServer implements HttpServer {
 
     private void write(SelectionKey selectionKey) {
         var socketChannel = (SocketChannel) selectionKey.channel();
-        HttpHandler handler = new NotFoundHttpHandler();
-        var requestLine = this.httpContext.request().requestLine();
-        var requestMethod = requestLine.method();
-        var requestPath = requestLine.target().getPath();
-        var nameOptional = this.routeNames.entrySet().stream()
-                .filter(entry -> entry.getKey().toString().equals(requestPath))
-                .map(Map.Entry::getValue)
-                .findFirst();
-        if (nameOptional.isPresent()) {
-            // Handler path matches to the current request path
-            var name = nameOptional.get();
-            var methods = routeMethods.get(name);
-            if (methods.contains(requestMethod)) {
-                // handler path and method match to the current request path and method
-                handler = this.routeHandlers.get(name);
-            } else {
-                // no handler method matches to the current request method
-                handler = new MethodNotAllowedHttpHandler();
-            }
-        }
-        var response = handler.handle(this.httpContext);
+        var response = this.handler.handle(this.httpContext);
         this.createResponse(socketChannel, response);
     }
 
@@ -241,7 +194,7 @@ final class KittyHttpServer implements HttpServer {
             socketChannel.write(responseBuffer);
             socketChannel.close();
         } catch (IOException exception) {
-            logger.log(System.Logger.Level.ERROR, exception);
+            this.logger.log(System.Logger.Level.ERROR, exception);
         }
     }
 }

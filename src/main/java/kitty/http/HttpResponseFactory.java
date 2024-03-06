@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
-
-import kitty.http.message.HttpResponse;
-import kitty.http.message.HttpStatusLine;
+package kitty.http;
 
 /**
  * @author Julian Jupiter

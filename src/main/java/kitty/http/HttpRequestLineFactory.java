@@ -13,11 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
-
-import kitty.http.message.HttpMethod;
-import kitty.http.message.HttpRequestLine;
-import kitty.http.message.HttpVersion;
+package kitty.http;
 
 import java.net.URI;
 

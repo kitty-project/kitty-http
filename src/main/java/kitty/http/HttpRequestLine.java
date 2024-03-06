@@ -13,20 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
+package kitty.http;
 
-import kitty.http.message.HttpContext;
-import kitty.http.message.HttpRequest;
-import kitty.http.message.HttpResponse;
+import java.net.URI;
 
 /**
  * @author Julian Jupiter
  */
-final class HttpContextFactory {
-    private HttpContextFactory() {
-    }
+public record HttpRequestLine(HttpMethod method, URI target, HttpVersion version) {
+    private static final String EMPTY_SPACE = " ";
 
-    public static HttpContext create(HttpRequest request, HttpResponse response) {
-        return new DefaultHttpContext(request, response);
+    @Override
+    public String toString() {
+        return this.method + EMPTY_SPACE + this.target + EMPTY_SPACE + this.version;
     }
 }

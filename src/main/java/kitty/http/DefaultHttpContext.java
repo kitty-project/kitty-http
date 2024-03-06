@@ -13,15 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
-
-import kitty.http.message.HttpContext;
-import kitty.http.message.HttpResponse;
+package kitty.http;
 
 /**
  * @author Julian Jupiter
  */
-@FunctionalInterface
-public interface HttpHandler {
-    HttpResponse handle(HttpContext context);
+record DefaultHttpContext(HttpRequest request, HttpResponse response) implements HttpContext {
 }

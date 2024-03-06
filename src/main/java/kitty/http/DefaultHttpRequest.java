@@ -13,18 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
-
-import kitty.http.message.HttpBody;
-import kitty.http.message.HttpCookie;
-import kitty.http.message.HttpHeader;
-import kitty.http.message.HttpRequest;
-import kitty.http.message.HttpRequestLine;
+package kitty.http;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * @author Julian Jupiter

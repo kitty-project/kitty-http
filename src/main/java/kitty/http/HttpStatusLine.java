@@ -13,33 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
-
-import kitty.http.message.HttpBody;
-import kitty.http.message.HttpHeader;
-import kitty.http.message.HttpMessage;
-
-import java.util.List;
+package kitty.http;
 
 /**
  * @author Julian Jupiter
  */
-class DefaultHttpMessage<T extends HttpMessage> {
-    protected final HttpHeaders headers;
-    protected HttpBody body;
-
-    DefaultHttpMessage() {
-        this.headers = HttpHeaders.create();
-        this.body = new NoContentHttpBody();
+public record HttpStatusLine(HttpVersion version, HttpStatus status) {
+    public HttpStatusLine status(HttpStatus status) {
+        return new HttpStatusLine(this.version, status);
     }
 
-    DefaultHttpMessage(List<HttpHeader> headers, HttpBody body) {
-        this.headers = HttpHeaders.create(headers);
-        this.body = body;
-    }
-
-    protected T body(HttpBody body) {
-        this.body = body;
-        return (T) this;
+    @Override
+    public String toString() {
+        return this.version + " " + this.status;
     }
 }

@@ -13,16 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kitty.http.server;
+package kitty.http;
 
-import kitty.http.message.HttpBody;
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * @author Julian Jupiter
  */
-record DefaultHttpBody(String value) implements HttpBody {
+public enum HttpVersion {
+    HTTP_1_1("HTTP/1.1"),
+    HTTP_2("HTTP/2"),
+    HTTP_3("HTTP/3");
+
+    public final String value;
+
+    HttpVersion(String value) {
+        this.value = value;
+    }
+
     @Override
     public String toString() {
         return value;
+    }
+
+    public static HttpVersion of(String version) {
+        return resolve(version)
+                .orElseThrow(() -> new IllegalArgumentException("No matching constant for [" + version + "]"));
+    }
+
+    public static Optional<HttpVersion> resolve(String version) {
+        return Arrays.stream(values())
+                .filter(httpVersion -> httpVersion.value.equals(version))
+                .findFirst();
     }
 }
