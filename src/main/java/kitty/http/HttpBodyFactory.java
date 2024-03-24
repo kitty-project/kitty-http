@@ -16,7 +16,6 @@
 package kitty.http;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 /**
  * @author Julian Jupiter
