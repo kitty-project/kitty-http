@@ -1,4 +1,4 @@
-# Kitty HTTP Server
+# Kitty HTTP
 
 ## Install
 ```shell
