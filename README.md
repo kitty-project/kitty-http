@@ -7,15 +7,16 @@
 ## Dependency
 ```xml
 <dependency>
-    <groupId>kitty</groupId>
-    <artifactId>kitty-http-server</artifactId>
+    <groupId>com.julianjupiter.kitty</groupId>
+    <artifactId>kitty-http</artifactId>
     <version>0.0.1</version>
 </dependency>
 ```
 ## Sample Codes
+
 ```java
-import kitty.http.HttpServer;
-import kitty.http.HttpStatus;
+import com.julianjupiter.kitty.http.HttpServer;
+import com.julianjupiter.kitty.http.HttpStatus;
 
 public class App {
     private static final System.Logger LOGGER = System.getLogger(App.class.getName());
