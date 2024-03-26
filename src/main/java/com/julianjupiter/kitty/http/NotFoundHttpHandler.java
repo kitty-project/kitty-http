@@ -20,8 +20,7 @@ package com.julianjupiter.kitty.http;
  */
 class NotFoundHttpHandler implements HttpHandler {
     @Override
-    public HttpResponse handle(HttpContext context) {
-        var response = context.response();
+    public HttpResponse handle(HttpRequest request, HttpResponse response) {
         var method = HttpStatus.NOT_FOUND;
         response.status(method);
         response.header("Content-Type", "text/plain");

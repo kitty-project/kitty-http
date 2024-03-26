@@ -38,7 +38,8 @@ final class KittyHttpServer implements HttpServer {
     private final String serveName;
     private int port = DEFAULT_PORT;
     private Executor executor;
-    private HttpContext httpContext;
+    private HttpRequest request;
+    private HttpResponse response;
     private final HttpHandler handler;
 
     public KittyHttpServer(HttpHandler handler, String name) {
@@ -152,9 +153,9 @@ final class KittyHttpServer implements HttpServer {
             var httpRequestHeaders = HttpHeadersFactory.create(clientRequest);
             var httpCookies = HttpCookiesFactory.create(httpRequestHeaders);
             var httpBody = HttpBodyFactory.create(clientRequest);
-            var httpRequest = HttpRequestFactory.create(httpRequestLine, httpRequestHeaders, httpCookies, httpBody);
+            this.request = HttpRequestFactory.create(httpRequestLine, httpRequestHeaders, httpCookies, httpBody);
             var defaultHttpHeaders = HttpHeadersFactory.create();
-            this.httpContext = HttpContextFactory.create(httpRequest, new DefaultHttpResponse(defaultHttpHeaders));
+            this.response = new DefaultHttpResponse(defaultHttpHeaders);
         } catch (IOException exception) {
             this.logger.log(System.Logger.Level.ERROR, exception);
         }
@@ -184,11 +185,11 @@ final class KittyHttpServer implements HttpServer {
 
     private void write(SelectionKey selectionKey) {
         var socketChannel = (SocketChannel) selectionKey.channel();
-        var response = this.handler.handle(this.httpContext);
-        this.createResponse(socketChannel, response);
+        var finalResponse = this.handler.handle(this.request, this.response);
+        this.createResponse(socketChannel, finalResponse);
     }
 
-    private void createResponse(SocketChannel socketChannel, HttpResponse response) {
+    private void createResponse(SocketChannel socketChannel, final HttpResponse response) {
         try {
             var responseBuffer = ByteBuffer.wrap(response.toString().getBytes(StandardCharsets.UTF_8));
             socketChannel.write(responseBuffer);

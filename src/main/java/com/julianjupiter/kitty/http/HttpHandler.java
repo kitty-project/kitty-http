@@ -20,5 +20,5 @@ package com.julianjupiter.kitty.http;
  */
 @FunctionalInterface
 public interface HttpHandler {
-    HttpResponse handle(HttpContext context);
+    HttpResponse handle(HttpRequest request, HttpResponse response);
 }
