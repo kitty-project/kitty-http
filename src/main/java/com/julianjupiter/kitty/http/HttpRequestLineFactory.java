@@ -32,7 +32,7 @@ final class HttpRequestLineFactory {
                 .split(" ");
 
         return new HttpRequestLine(
-                HttpMethod.valueOf(requestLineSegments[0]),
+                HttpMethod.of(requestLineSegments[0]),
                 URI.create(requestLineSegments[1]),
                 HttpVersion.of(requestLineSegments[2])
         );
