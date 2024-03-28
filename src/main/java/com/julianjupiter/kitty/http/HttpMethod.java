@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * @author Julian Jupiter
  */
-final public class HttpMethod {
+public final class HttpMethod {
     public static final HttpMethod DELETE = new HttpMethod("DELETE");
     public static final HttpMethod GET = new HttpMethod("GET");
     public static final HttpMethod HEAD = new HttpMethod("HEAD");
