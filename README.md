@@ -22,11 +22,8 @@ public class App {
     private static final System.Logger LOGGER = System.getLogger(App.class.getName());
 
     public static void main(String[] args) {
-        var server = HttpServer.createServer(context -> {
-            var response = context.response();
-            var currentPath = context.request()
-                    .requestLine()
-                    .target()
+        var server = HttpServer.createServer((request, response) -> {
+            var currentPath = request.requestLine().target()
                     .getPath();
             return switch (currentPath) {
                 case "/" -> response.body("Welcome home!");
