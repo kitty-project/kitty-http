@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 target="./target"
-cd $target
+cd $target || exit
 
 # Sign with GPG/PGP
 gpg -ab kitty-http-0.0.1.jar

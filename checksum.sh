@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 target="./target"
-cd $target
+cd $target || exit
 
 # Checksum
 md5sum kitty-http-0.0.1.jar > kitty-http-0.0.1.jar.md5
