@@ -60,11 +60,18 @@ class DefaultHttpRequest extends DefaultHttpMessage<HttpRequest> implements Http
 
     @Override
     public String toString() {
-        return """
-                %s
-                %s
-                
-                %s
-                """.formatted(this.requestLine, this.headers, this.body);
+        if (this.body instanceof DefaultHttpBody) {
+            return """
+                    %s
+                    %s
+                                    
+                    %s
+                    """.formatted(this.requestLine, this.headers, this.body);
+        } else {
+            return """
+                    %s
+                    %s
+                    """.formatted(this.requestLine, this.headers);
+        }
     }
 }

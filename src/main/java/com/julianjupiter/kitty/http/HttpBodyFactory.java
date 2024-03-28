@@ -41,6 +41,10 @@ final class HttpBodyFactory {
             list.add(line);
         }
 
+        if (list.isEmpty()) {
+            return new EmptyHttpBody();
+        }
+
         return new DefaultHttpBody(String.join("\n", list));
     }
 }
