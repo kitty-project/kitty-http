@@ -18,7 +18,7 @@ package com.julianjupiter.kitty.http;
 /**
  * @author Julian Jupiter
  */
-final class NoContentHttpBody implements HttpBody {
+record NoContentHttpBody() implements HttpBody {
     @Override
     public String toString() {
         return "";

@@ -42,7 +42,7 @@ final class HttpBodyFactory {
         }
 
         if (list.isEmpty()) {
-            return new EmptyHttpBody();
+            return new NoContentHttpBody();
         }
 
         return new DefaultHttpBody(String.join("\n", list));
