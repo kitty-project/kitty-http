@@ -33,21 +33,12 @@ import java.util.concurrent.Executor;
  */
 final class KittyHttpServer implements HttpServer {
     private final System.Logger logger = System.getLogger(KittyHttpServer.class.getName());
+    private final ServerConfiguration serverConfiguration;
     private static volatile boolean running = true;
-    private static final int DEFAULT_PORT = 8080;
-    private static final int BUFFER_CAPACITY = 1024;
-    private final HttpHandler handler;
-    private final String serveName;
-    private int port = DEFAULT_PORT;
     private Executor executor;
 
     public KittyHttpServer(HttpHandler handler, String name) {
-        this.handler = handler;
-        if (name == null || name.isBlank()) {
-            this.serveName = "kitty-http-server-" + UUID.randomUUID().toString().substring(0, 8);
-        } else {
-            this.serveName = name;
-        }
+        this.serverConfiguration = new ServerConfiguration(handler, this.createServerName(name));
     }
 
     @Override
@@ -60,38 +51,50 @@ final class KittyHttpServer implements HttpServer {
 
     @Override
     public void start() {
-        this.start(DEFAULT_PORT, null);
+        this.startServer();
     }
 
     @Override
     public void start(int port) {
-        this.start(port, null);
+        this.serverConfiguration.port(port);
+        this.startServer();
     }
 
     @Override
     public void start(Runnable runnable) {
-        this.start(DEFAULT_PORT, runnable);
-    }
-
-    @Override
-    public void start(int port, Runnable runnable) {
-        this.port = port;
         if (runnable != null) {
             runnable.run();
         }
         this.startServer();
     }
 
+    @Override
+    public void start(int port, Runnable runnable) {
+        this.serverConfiguration.port(port);
+        if (runnable != null) {
+            runnable.run();
+        }
+        this.startServer();
+    }
+
+    private String createServerName(String name) {
+        if (name == null || name.isBlank()) {
+            return  "kitty-http-server-" + UUID.randomUUID().toString().substring(0, 8);
+        }
+
+        return name;
+    }
+
     private void startServer() {
         try (var selector = Selector.open();
              var serverSocketChannel = ServerSocketChannel.open()) {
             if (serverSocketChannel.isOpen() && selector.isOpen()) {
-                serverSocketChannel.bind(new InetSocketAddress(this.port));
+                serverSocketChannel.bind(this.inetSocketAddress());
                 serverSocketChannel.configureBlocking(false);
                 serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-                serverSocketChannel.setOption(StandardSocketOptions.SO_RCVBUF, BUFFER_CAPACITY * 256);
+                serverSocketChannel.setOption(StandardSocketOptions.SO_RCVBUF, this.serverConfiguration.bufferCapacity() * 256);
                 serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-                this.logger.log(System.Logger.Level.INFO, "HTTP server name: " + this.serveName);
+                this.logger.log(System.Logger.Level.INFO, "HTTP server name: " + this.serverConfiguration.name());
                 this.process(selector);
             } else {
                 this.logger.log(System.Logger.Level.ERROR, "The server socket channel or selector cannot be opened!");
@@ -99,6 +102,15 @@ final class KittyHttpServer implements HttpServer {
         } catch (IOException exception) {
             this.logger.log(System.Logger.Level.ERROR, exception);
         }
+    }
+
+    private InetSocketAddress inetSocketAddress() {
+        String hostname = this.serverConfiguration.hostname();
+        if (hostname != null && !hostname.isBlank()) {
+            return new InetSocketAddress(hostname, this.serverConfiguration.port());
+        }
+
+        return new InetSocketAddress(this.serverConfiguration.port());
     }
 
     private void process(Selector selector) throws IOException {
@@ -167,7 +179,7 @@ final class KittyHttpServer implements HttpServer {
 
     private void read(Selector selector, SelectionKey selectionKey) throws IOException {
         var clientChannel = (SocketChannel) selectionKey.channel();
-        var byteBuffer = ByteBuffer.allocate(BUFFER_CAPACITY);
+        var byteBuffer = ByteBuffer.allocate(this.serverConfiguration.bufferCapacity());
         int bytesRead = clientChannel.read(byteBuffer);
         if (bytesRead == -1) {
             clientChannel.close();
@@ -184,7 +196,7 @@ final class KittyHttpServer implements HttpServer {
     private void write(SelectionKey selectionKey) {
         var request = (HttpRequest) selectionKey.attachment();
         var response = new DefaultHttpResponse(HttpHeadersFactory.create());
-        var finalResponse = this.handler.handle(request, response);
+        var finalResponse = this.serverConfiguration.handler().handle(request, response);
         this.createResponse(selectionKey, finalResponse);
     }
 
