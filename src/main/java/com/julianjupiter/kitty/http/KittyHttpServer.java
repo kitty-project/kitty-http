@@ -37,6 +37,10 @@ final class KittyHttpServer implements HttpServer {
     private static volatile boolean running = true;
     private Executor executor;
 
+    static {
+        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] [%4$s] %5$s %n");
+    }
+
     public KittyHttpServer(HttpHandler handler, String name) {
         this.serverConfiguration = new ServerConfiguration(handler, this.createServerName(name));
     }
@@ -85,7 +89,7 @@ final class KittyHttpServer implements HttpServer {
 
     private String createServerName(String name) {
         if (name == null || name.isBlank()) {
-            return  "kitty-http-server-" + UUID.randomUUID().toString().substring(0, 8);
+            return "kitty-http-server-" + UUID.randomUUID().toString().substring(0, 8);
         }
 
         return name;
@@ -101,6 +105,8 @@ final class KittyHttpServer implements HttpServer {
                 serverSocketChannel.setOption(StandardSocketOptions.SO_RCVBUF, this.serverConfiguration.bufferCapacity() * 256);
                 serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
                 this.logger.log(System.Logger.Level.INFO, "HTTP server name: " + this.serverConfiguration.name());
+                var socket = serverSocketChannel.socket();
+                this.logger.log(System.Logger.Level.INFO, "HTTP server address: " + socket.getInetAddress().getHostAddress() + ":" + socket.getLocalPort());
                 this.process(selector);
             } else {
                 this.logger.log(System.Logger.Level.ERROR, "The server socket channel or selector cannot be opened!");
