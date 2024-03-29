@@ -209,7 +209,7 @@ final class KittyHttpServer implements HttpServer {
         var request = (HttpRequest) selectionKey.attachment();
         var response = new DefaultHttpResponse(HttpHeadersFactory.create());
         var finalResponse = this.serverConfiguration.handler().handle(request, response);
-        this.createResponse(selectionKey, finalResponse);
+        this.writeResponse(selectionKey, finalResponse);
     }
 
     private HttpRequest createRequest(String clientRequest) {
@@ -221,7 +221,7 @@ final class KittyHttpServer implements HttpServer {
         return HttpRequestFactory.create(httpRequestLine, httpHeaders, httpCookies, httpBody);
     }
 
-    private void createResponse(SelectionKey selectionKey, HttpResponse response) {
+    private void writeResponse(SelectionKey selectionKey, HttpResponse response) {
         var clientChannel = (SocketChannel) selectionKey.channel();
 
         try {
