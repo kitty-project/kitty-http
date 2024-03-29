@@ -50,6 +50,12 @@ final class KittyHttpServer implements HttpServer {
     }
 
     @Override
+    public HttpServer hostname(String hostname) {
+        this.serverConfiguration.hostname(hostname);
+        return this;
+    }
+
+    @Override
     public void start() {
         this.startServer();
     }

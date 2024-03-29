@@ -30,4 +30,6 @@ public interface HttpServer extends Starter {
     }
 
     HttpServer executor(Executor executor);
+
+    HttpServer hostname(String hostname);
 }
