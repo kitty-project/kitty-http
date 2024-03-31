@@ -10,6 +10,7 @@
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>An HTTP framework built on Java NIO.</description>
+    <url>https://kitty-project.github.io</url>
 
     <developers>
         <developer>
@@ -31,6 +32,7 @@
         <url>https://github.com/kitty-project/kitty-http-server</url>
         <connection>scm:git:ssh://git@github.com/kitty-project/kitty-http-server.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/kitty-project/kitty-http-server.git</developerConnection>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
@@ -45,9 +47,10 @@
     </distributionManagement>
 
     <properties>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
@@ -73,6 +76,12 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
             </plugin>
@@ -101,6 +110,30 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.2</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.4.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
+                </configuration>
             </plugin>
         </plugins>
     </build>
