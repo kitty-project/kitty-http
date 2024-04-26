@@ -61,7 +61,7 @@ public final class HttpMethod {
         this.value = value;
     }
 
-    public String name() {
+    public String value() {
         return value;
     }
 
@@ -70,16 +70,16 @@ public final class HttpMethod {
         return value;
     }
 
-    public static HttpMethod of(String method) {
-        if (method == null) {
+    public static HttpMethod of(String value) {
+        if (value == null) {
             throw new IllegalArgumentException("HTTP method cannot be null");
         }
 
-        method = method.toUpperCase(Locale.ROOT);
-        if (values.containsKey(method)) {
-            return values.get(method);
+        value = value.toUpperCase(Locale.ROOT);
+        if (values.containsKey(value)) {
+            return values.get(value);
         } else {
-            var newHttpMethod = new HttpMethod(method);
+            var newHttpMethod = new HttpMethod(value);
             values.put(newHttpMethod.value, newHttpMethod);
             return newHttpMethod;
         }
