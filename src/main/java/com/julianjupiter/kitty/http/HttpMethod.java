@@ -71,6 +71,10 @@ public final class HttpMethod {
     }
 
     public static HttpMethod of(String method) {
+        if (method == null) {
+            throw new IllegalArgumentException("HTTP method cannot be null");
+        }
+
         method = method.toUpperCase(Locale.ROOT);
         if (values.containsKey(method)) {
             return values.get(method);
