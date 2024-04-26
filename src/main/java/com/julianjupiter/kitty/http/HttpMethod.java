@@ -57,7 +57,7 @@ public final class HttpMethod {
         values.put(trace.value, trace);
     }
 
-    public HttpMethod(String value) {
+    private HttpMethod(String value) {
         this.value = value;
     }
 
