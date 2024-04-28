@@ -71,8 +71,8 @@ public final class HttpMethod {
     }
 
     public static HttpMethod of(String value) {
-        if (value == null) {
-            throw new IllegalArgumentException("HTTP method cannot be null");
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("HTTP method cannot be null or blank");
         }
 
         value = value.toUpperCase(Locale.ROOT);
