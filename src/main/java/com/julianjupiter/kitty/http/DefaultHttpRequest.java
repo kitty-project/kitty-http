@@ -64,7 +64,7 @@ class DefaultHttpRequest extends DefaultHttpMessage<HttpRequest> implements Http
             return """
                     %s
                     %s
-                                    
+
                     %s
                     """.formatted(this.requestLine, this.headers, this.body);
         } else {

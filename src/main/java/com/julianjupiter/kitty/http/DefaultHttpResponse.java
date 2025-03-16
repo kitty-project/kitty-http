@@ -125,7 +125,7 @@ class DefaultHttpResponse extends DefaultHttpMessage<HttpResponse> implements Ht
                     yield """
                             %s
                             %s
-                                                
+
                             %s
                             """.formatted(this.statusLine, this.headers, defaultBody);
                 } else {
@@ -133,7 +133,7 @@ class DefaultHttpResponse extends DefaultHttpMessage<HttpResponse> implements Ht
                             %s
                             %s
                             %s
-                                                
+
                             %s
                             """.formatted(this.statusLine, this.headers, this.cookies, defaultBody);
                 }

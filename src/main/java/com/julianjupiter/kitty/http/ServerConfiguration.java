@@ -15,7 +15,8 @@
  */
 package com.julianjupiter.kitty.http;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Julian Jupiter
@@ -23,11 +24,12 @@ import java.util.concurrent.Executor;
 public class ServerConfiguration {
     private static final int DEFAULT_BUFFER_CAPACITY = 1024;
     private static final int DEFAULT_PORT = 8080;
+    private static final ExecutorService DEFAULT_EXECUTOR_SERVICE = Executors.newVirtualThreadPerTaskExecutor();
     private final String name;
     private String hostname;
     private int port = DEFAULT_PORT;
     private final HttpHandler handler;
-    private Executor executor;
+    private ExecutorService executorService = DEFAULT_EXECUTOR_SERVICE;
     private int bufferCapacity = DEFAULT_BUFFER_CAPACITY;
 
     public ServerConfiguration(HttpHandler handler, String name) {
@@ -61,12 +63,12 @@ public class ServerConfiguration {
         return handler;
     }
 
-    public Executor executor() {
-        return executor;
+    public ExecutorService executorService() {
+        return executorService;
     }
 
-    public ServerConfiguration executor(Executor executor) {
-        this.executor = executor;
+    public ServerConfiguration executorService(ExecutorService executorService) {
+        this.executorService = executorService;
         return this;
     }
 

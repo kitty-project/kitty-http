@@ -15,7 +15,8 @@
  */
 package com.julianjupiter.kitty.http;
 
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
 
 /**
  * @author Julian Jupiter
@@ -24,7 +25,27 @@ final class HttpRequestFactory {
     private HttpRequestFactory() {
     }
 
-    public static HttpRequest create(HttpRequestLine requestLine, List<HttpHeader> headers, List<HttpCookie> cookies, HttpBody body) {
-        return new DefaultHttpRequest(requestLine, headers, cookies, body);
+    public static HttpRequest create(BufferedReader reader) {
+        try {
+            var sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) {
+                    break;
+                }
+
+                sb.append(line).append("\n");
+            }
+
+            var request = sb.toString();
+            var httpRequestLine = HttpRequestLineFactory.create(request);
+            var httpHeaders = HttpHeadersFactory.create(request);
+            var httpCookies = HttpCookiesFactory.create(httpHeaders);
+            var httpBody = HttpBodyFactory.create(request);
+
+            return new DefaultHttpRequest(httpRequestLine, httpHeaders, httpCookies, httpBody);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

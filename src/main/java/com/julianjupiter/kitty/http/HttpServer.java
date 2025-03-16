@@ -16,6 +16,7 @@
 package com.julianjupiter.kitty.http;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author Julian Jupiter
@@ -29,7 +30,7 @@ public interface HttpServer extends Starter {
         return new KittyHttpServer(handler, name);
     }
 
-    HttpServer executor(Executor executor);
+    HttpServer executorService(ExecutorService executorService);
 
     HttpServer hostname(String hostname);
 }

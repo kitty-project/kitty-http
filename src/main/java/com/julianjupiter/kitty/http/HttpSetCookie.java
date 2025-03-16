@@ -15,7 +15,7 @@
  */
 package com.julianjupiter.kitty.http;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -27,7 +27,7 @@ public record HttpSetCookie(
         String value,
         String domain,
         String path,
-        OffsetDateTime expires,
+        Instant expires,
         long maxAge,
         boolean httpOnly,
         boolean secure,
@@ -49,7 +49,7 @@ public record HttpSetCookie(
         return new HttpSetCookie(this.name, this.value, this.domain, path, this.expires, this.maxAge, this.httpOnly, this.secure, this.sameSite, this.partitioned);
     }
 
-    public HttpSetCookie expires(OffsetDateTime expires) {
+    public HttpSetCookie expires(Instant expires) {
         return new HttpSetCookie(this.name, this.value, this.domain, this.path, expires, this.maxAge, this.httpOnly, this.secure, this.sameSite, this.partitioned);
     }
 
