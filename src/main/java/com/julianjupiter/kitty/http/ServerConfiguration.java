@@ -16,71 +16,20 @@
 package com.julianjupiter.kitty.http;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @author Julian Jupiter
  */
-public class ServerConfiguration {
-    private static final int DEFAULT_BUFFER_CAPACITY = 1024;
-    private static final int DEFAULT_PORT = 8080;
-    private static final ExecutorService DEFAULT_EXECUTOR_SERVICE = Executors.newVirtualThreadPerTaskExecutor();
-    private final String name;
-    private String hostname;
-    private int port = DEFAULT_PORT;
-    private final HttpHandler handler;
-    private ExecutorService executorService = DEFAULT_EXECUTOR_SERVICE;
-    private int bufferCapacity = DEFAULT_BUFFER_CAPACITY;
+public interface ServerConfiguration {
+    String name();
 
-    public ServerConfiguration(HttpHandler handler, String name) {
-        this.handler = handler;
-        this.name = name;
-    }
+    String hostname();
 
-    public String name() {
-        return name;
-    }
+    int port();
 
-    public String hostname() {
-        return hostname;
-    }
+    HttpHandler handler();
 
-    public ServerConfiguration hostname(String hostname) {
-        this.hostname = hostname;
-        return this;
-    }
+    ExecutorService executorService();
 
-    public int port() {
-        return port;
-    }
-
-    public ServerConfiguration port(int port) {
-        this.port = port;
-        return this;
-    }
-
-    public HttpHandler handler() {
-        return handler;
-    }
-
-    public ExecutorService executorService() {
-        return executorService;
-    }
-
-    public ServerConfiguration executorService(ExecutorService executorService) {
-        if (executorService != null) {
-            this.executorService = executorService;
-        }
-
-        return this;
-    }
-
-    public int bufferCapacity() {
-        return bufferCapacity;
-    }
-
-    public ServerConfiguration bufferCapacity(int bufferCapacity) {
-        this.bufferCapacity = bufferCapacity;
-        return this;
-    }
+    int bufferCapacity();
 }

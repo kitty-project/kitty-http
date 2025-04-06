@@ -26,14 +26,19 @@ import java.util.concurrent.ExecutorService;
  */
 final class KittyHttpServer implements HttpServer {
     private final System.Logger logger = System.getLogger(KittyHttpServer.class.getName());
-    private final ServerConfiguration serverConfiguration;
+    private final KittyServerConfiguration serverConfiguration;
 
     static {
         System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] [%4$s] - %5$s %n");
     }
 
     public KittyHttpServer(HttpHandler handler, String name) {
-        this.serverConfiguration = new ServerConfiguration(handler, this.createServerName(name));
+        this.serverConfiguration = new KittyServerConfiguration(handler, this.createServerName(name));
+    }
+
+    @Override
+    public ServerConfiguration config() {
+        return this.serverConfiguration;
     }
 
     @Override
@@ -100,7 +105,6 @@ final class KittyHttpServer implements HttpServer {
                 }
             }
         } catch (IOException exception) {
-            exception.printStackTrace();
             this.logger.log(System.Logger.Level.ERROR, exception.getMessage());
         }
     }

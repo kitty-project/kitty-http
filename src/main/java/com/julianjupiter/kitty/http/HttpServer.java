@@ -29,6 +29,8 @@ public interface HttpServer extends Starter {
         return new KittyHttpServer(handler, name);
     }
 
+    ServerConfiguration config();
+
     HttpServer executorService(ExecutorService executorService);
 
     HttpServer hostname(String hostname);
