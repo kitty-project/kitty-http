@@ -15,7 +15,6 @@
  */
 package com.julianjupiter.kitty.http;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 /**
