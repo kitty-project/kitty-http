@@ -88,6 +88,8 @@ final class KittyHttpServer implements HttpServer {
         try (var executorService = this.serverConfiguration.executorService();
              var serverSocket = new ServerSocket()) {
             serverSocket.bind(this.inetSocketAddress());
+            int port = serverSocket.getLocalPort();
+            this.logger.log(System.Logger.Level.INFO, "Server " + this.serverConfiguration.name() + " running on " + this.serverConfiguration.hostname() + ":" + port);
             while (true) {
                 var clientSocket = serverSocket.accept();
                 var clientHandler = new ClientHandler(clientSocket, this.serverConfiguration.handler());
