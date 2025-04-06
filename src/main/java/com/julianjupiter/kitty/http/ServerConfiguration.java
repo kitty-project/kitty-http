@@ -68,7 +68,10 @@ public class ServerConfiguration {
     }
 
     public ServerConfiguration executorService(ExecutorService executorService) {
-        this.executorService = executorService;
+        if (executorService != null) {
+            this.executorService = executorService;
+        }
+
         return this;
     }
 
