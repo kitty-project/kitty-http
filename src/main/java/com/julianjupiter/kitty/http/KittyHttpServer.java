@@ -60,24 +60,22 @@ final class KittyHttpServer implements HttpServer {
 
     @Override
     public void start(int port) {
-        this.serverConfiguration.port(port);
-        this.startServer();
+        this.start(port, null);
     }
 
     @Override
     public void start(Runnable runnable) {
-        if (runnable != null) {
-            runnable.run();
-        }
-        this.startServer();
+        this.start(ServerConfiguration.DEFAULT_PORT, runnable);
     }
 
     @Override
     public void start(int port, Runnable runnable) {
+        port = port < 1 ? findFreePort() : port;
         this.serverConfiguration.port(port);
         if (runnable != null) {
             runnable.run();
         }
+
         this.startServer();
     }
 
@@ -94,7 +92,7 @@ final class KittyHttpServer implements HttpServer {
              var serverSocket = new ServerSocket()) {
             serverSocket.bind(this.inetSocketAddress());
             int port = serverSocket.getLocalPort();
-            this.logger.log(System.Logger.Level.INFO, "Server " + this.serverConfiguration.name() + " running on " + this.serverConfiguration.hostname() + ":" + port);
+            this.logger.log(System.Logger.Level.INFO, "HTTP server started on port " + port);
             while (true) {
                 var clientSocket = serverSocket.accept();
                 var clientHandler = new ClientHandler(clientSocket, this.serverConfiguration.handler());
@@ -116,5 +114,19 @@ final class KittyHttpServer implements HttpServer {
         }
 
         return new InetSocketAddress(this.serverConfiguration.port());
+    }
+
+    private static int findFreePort() {
+        int port = -1;
+
+        do {
+            try (var socket = new ServerSocket(0)) {
+                port = socket.getLocalPort();
+            } catch (IOException e) {
+                port = -1;
+            }
+        } while (port == -1);
+
+        return port;
     }
 }

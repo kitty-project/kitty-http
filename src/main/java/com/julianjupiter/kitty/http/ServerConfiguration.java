@@ -16,14 +16,21 @@
 package com.julianjupiter.kitty.http;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Julian Jupiter
  */
 public interface ServerConfiguration {
+    int DEFAULT_BUFFER_CAPACITY = 1024;
+    int DEFAULT_PORT = 8080;
+    ExecutorService DEFAULT_EXECUTOR_SERVICE = Executors.newVirtualThreadPerTaskExecutor();
+
     String name();
 
     String hostname();
+
+    int defaultPort();
 
     int port();
 

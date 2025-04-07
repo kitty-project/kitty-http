@@ -16,15 +16,11 @@
 package com.julianjupiter.kitty.http;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @author Julian Jupiter
  */
 class KittyServerConfiguration implements ServerConfiguration {
-    private static final int DEFAULT_BUFFER_CAPACITY = 1024;
-    private static final int DEFAULT_PORT = 8080;
-    private static final ExecutorService DEFAULT_EXECUTOR_SERVICE = Executors.newVirtualThreadPerTaskExecutor();
     private final String name;
     private String hostname;
     private int port = DEFAULT_PORT;
@@ -48,6 +44,11 @@ class KittyServerConfiguration implements ServerConfiguration {
     public KittyServerConfiguration hostname(String hostname) {
         this.hostname = hostname;
         return this;
+    }
+
+    @Override
+    public int defaultPort() {
+        return DEFAULT_PORT;
     }
 
     public int port() {
