@@ -18,15 +18,18 @@ package com.julianjupiter.kitty.http;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 /**
  * @author Julian Jupiter
  */
-final class KittyHttpServer implements HttpServer {
+final class KittyHttpServer implements HttpServer, Runnable {
     private final System.Logger logger = System.getLogger(KittyHttpServer.class.getName());
     private final KittyServerConfiguration serverConfiguration;
+    private Thread worker;
+    private volatile boolean running = false;
 
     static {
         System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] [%4$s] - %5$s %n");
@@ -79,32 +82,45 @@ final class KittyHttpServer implements HttpServer {
         this.startServer();
     }
 
+    @Override
+    public void run() {
+        this.running = true;
+
+        try (var serverSocket = new ServerSocket()) {
+            serverSocket.bind(this.inetSocketAddress());
+            int port = serverSocket.getLocalPort();
+            this.logger.log(System.Logger.Level.INFO, "HTTP server started on port " + port + ".");
+            while (this.running) {
+                var clientSocket = serverSocket.accept();
+                this.handleClient(clientSocket);
+            }
+        } catch (IOException exception) {
+            this.logger.log(System.Logger.Level.ERROR, exception.getMessage());
+        }
+    }
+
+    private void handleClient(Socket clientSocket) {
+        try (var executorService = this.serverConfiguration.executorService()) {
+            var clientHandler = new ClientHandler(clientSocket, this.serverConfiguration.handler());
+            if (executorService != null) {
+                executorService.execute(clientHandler);
+            } else {
+                Thread.ofVirtual().start(clientHandler);
+            }
+        }
+    }
+
+    private void startServer() {
+        this.worker = new Thread(this);
+        this.worker.start();
+    }
+
     private String createServerName(String name) {
         if (name == null || name.isBlank()) {
             return "kitty-http-server-" + UUID.randomUUID().toString().substring(0, 8);
         }
 
         return name;
-    }
-
-    private void startServer() {
-        try (var executorService = this.serverConfiguration.executorService();
-             var serverSocket = new ServerSocket()) {
-            serverSocket.bind(this.inetSocketAddress());
-            int port = serverSocket.getLocalPort();
-            this.logger.log(System.Logger.Level.INFO, "HTTP server started on port " + port);
-            while (true) {
-                var clientSocket = serverSocket.accept();
-                var clientHandler = new ClientHandler(clientSocket, this.serverConfiguration.handler());
-                if (executorService != null) {
-                    executorService.execute(clientHandler);
-                } else {
-                    clientHandler.run();
-                }
-            }
-        } catch (IOException exception) {
-            this.logger.log(System.Logger.Level.ERROR, exception.getMessage());
-        }
     }
 
     private InetSocketAddress inetSocketAddress() {
